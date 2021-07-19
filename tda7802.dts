@@ -1,0 +1,56 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "brcm,bcm2835";
+
+	fragment@0 {
+		target = <&i2s>;
+
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@1 {
+		target = <&i2c1>;
+
+		__overlay__ {
+			#address-cells = < 0x01 >;
+			#size-cells = < 0x00 >;
+			status = "okay";
+
+			tda7802_codec: tda7802@6c {
+				#sound-dai-cells = < 0x00 >;
+				compatible = "st,tda7802-stereo";
+				reg = < 0x6c >;
+				st,gain-ch13 = <1>;
+				st,gain-ch24 = <1>;
+				st,diagnostic-mode-ch13 = "Speaker";
+				st,diagnostic-mode-ch24 = "Speaker";
+				status = "okay";
+			};
+		};
+	};
+
+	fragment@2 {
+		target = <&sound>;
+
+		sound_overlay: __overlay__ {
+			compatible = "simple-audio-card";
+			simple-audio-card,format = "i2s";
+			simple-audio-card,name = "tda7802-stereo";
+			simple-audio-card,bitclock-master = <&dailink0_master>;
+			simple-audio-card,frame-master = <&dailink0_master>;
+			simple-audio-card,dai-tdm-slot-num = <4>;
+			simple-audio-card,dai-tdm-slot-width = <0>;
+			status = "okay";
+			simple-audio-card,cpu {
+				sound-dai = <&i2s>;
+			};
+			dailink0_master: simple-audio-card,codec {
+				sound-dai = <&tda7802_codec>;
+			};
+		};
+	};
+};
